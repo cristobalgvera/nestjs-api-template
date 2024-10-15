@@ -8,9 +8,11 @@ import helmet from 'helmet';
 import packageJson from 'src/../package.json';
 import { AppModule } from './app.module';
 
+type EnvironmentOptions = Readonly<{ isServerless?: boolean }>;
+
 const GLOBAL_PREFIX = 'api';
 
-export async function setupApp() {
+export async function setupApp(options: EnvironmentOptions = {}) {
   const expressApp = setupExpress();
   const app = await NestFactory.create(
     AppModule,
@@ -20,7 +22,7 @@ export async function setupApp() {
   app.setGlobalPrefix(GLOBAL_PREFIX);
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
 
-  setupSwagger(app);
+  setupSwagger(app, options.isServerless);
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
@@ -37,14 +39,22 @@ function setupExpress() {
   return expressApp;
 }
 
-function setupSwagger(app: INestApplication) {
+function setupSwagger(app: INestApplication, isServerless = false) {
   const config = new DocumentBuilder()
     .setTitle(packageJson.name)
     .setDescription(packageJson.description)
     .setVersion(packageJson.version)
     .build();
 
+  if (isServerless)
+    app.setGlobalPrefix(
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      `${process.env.NODE_ENV}/${packageJson.name}/${GLOBAL_PREFIX}`,
+    );
+
   const document = SwaggerModule.createDocument(app, config);
 
   SwaggerModule.setup(GLOBAL_PREFIX, app, document);
+
+  if (isServerless) app.setGlobalPrefix(GLOBAL_PREFIX);
 }

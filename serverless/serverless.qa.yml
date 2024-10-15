@@ -1,0 +1,24 @@
+---
+service: ${file(./serverless/serverless.common.yml):service}
+plugins: ${file(./serverless/serverless.common.yml):plugins}
+provider: ${file(./serverless/serverless.common.yml):provider}
+package: ${file(./serverless/serverless.common.yml):package}
+useDotenv: ${file(./serverless/serverless.common.yml):useDotenv}
+functions: ${file(./serverless/serverless.common.yml):functions}
+
+custom:
+  stage: qa
+  logRetentionInDays: ${file(./serverless/serverless.common.yml):custom.logRetentionInDays}
+  # TODO: Uncomment the following line if you have any managed policies
+  # managedPolicies:
+  #   - arn:aws:iam::aws:policy/YOUR_POLICY
+  apiGateway:
+    # TODO: Replace with the proper API ID and resource ID
+    restApiId: ID
+    restApiRootResourceId: RESOURCE_ID
+  vpc:
+    # TODO: Replace with the proper security group and subnet IDs
+    securityGroupIds:
+      - GROUP_IDS
+    subnetIds:
+      - SUBNET_IDS

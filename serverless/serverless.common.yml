@@ -1,0 +1,58 @@
+---
+# TODO: Change the service name, it must be the same as the one in the package.json
+service: nestjs-api-template
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-plugin-log-retention
+  - serverless-deployment-bucket
+
+provider:
+  name: aws
+  stage: ${self:custom.stage}
+  runtime: nodejs20.x
+  iam:
+    role:
+      name: ${self:service}-${sls:stage}-role
+      # TODO: Uncomment the following line if you have any managed policies
+      # managedPolicies: ${self:custom.managedPolicies, ""}
+  tracing:
+    lambda: true
+  memorySize: 256
+  timeout: 30
+  versionFunctions: false
+  deploymentBucket:
+    name: ${self:service}-${sls:stage}
+    serverSideEncryption: AES256
+  apiGateway: ${self:custom.apiGateway}
+  vpc: ${self:custom.vpc}
+  environment:
+    NODE_ENV: ${sls:stage}
+    # TODO: Add environment variables here
+    # MY_VAR: ${env:MY_VAR}
+
+package:
+  patterns:
+    - '!./**'
+    - app/**
+    - node_modules/**
+    - package.json
+
+useDotenv: true
+
+functions:
+  main:
+    name: ${self:service}-${sls:stage}
+    handler: app/src/lambda.handler
+    events:
+      - http:
+          method: ANY
+          path: /${self:service}
+          cors: true
+      - http:
+          method: ANY
+          path: '/${self:service}/{proxy+}'
+          cors: true
+
+custom:
+  logRetentionInDays: 30

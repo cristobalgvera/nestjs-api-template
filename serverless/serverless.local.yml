@@ -1,0 +1,19 @@
+---
+service: ${file(./serverless/serverless.common.yml):service}
+
+plugins:
+  - serverless-offline
+
+provider: ${file(./serverless/serverless.common.yml):provider}
+package: ${file(./serverless/serverless.common.yml):package}
+useDotenv: ${file(./serverless/serverless.common.yml):useDotenv}
+functions: ${file(./serverless/serverless.common.yml):functions}
+
+custom:
+  stage: local
+  managedPolicies: local
+  apiGateway: local
+  vpc: local
+  serverless-offline:
+    lambdaPort: 3002
+    httpPort: 3000
